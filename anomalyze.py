@@ -5,6 +5,7 @@ import rosbag
 import math
 import re
 import time
+import datetime
 import argparse
 import matplotlib.pyplot as plt
 
@@ -35,8 +36,10 @@ class AnomalyTest(object):
   def found_anomaly(self, desc, start_rostime, end_rostime, msg):
 
     duration_ms = (end_rostime - start_rostime) / 1e6
-    start = time.ctime(start_rostime.to_sec())
-    end = time.ctime(end_rostime.to_sec())
+
+    # get time strings in UTC 
+    start = datetime.datetime.utcfromtimestamp(start_rostime.to_sec()).strftime('%Y-%m-%d %H:%M:%S UTC')
+    end = datetime.datetime.utcfromtimestamp(end_rostime.to_sec()).strftime('%Y-%m-%d %H:%M:%S UTC')
 
     print((YEL+'{}'+RST+' - duration: '+GRN+'{}'+RST+' ms \tstart: '+
           BLU+'{}'+RST+' end: '+BLU+'{}'+RST).format(
@@ -192,7 +195,7 @@ class DataGrapher(AnomalyTest):
       plt.plot(self.message_data[channel]['t'], self.message_data[channel]['testStat'], label=channel)
       plt.plot(ExtendedOutageTest.outage_start_ts[channel], [200 for x in ExtendedOutageTest.outage_start_ts[channel]], 'o', label=channel+' outage')
 
-    plt.xlabel('Unix Time (s)')
+    plt.xlabel('Unix Time (ns)')
     plt.ylabel('TestStat')
     plt.title('TestStat')
     plt.legend()
